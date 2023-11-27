@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 using Avalonia;
 using Avalonia.Platform;
 
@@ -21,13 +23,14 @@ public class FALocalizationHelper
 
         KeepType<LocalizationMap>();
         KeepType<LocalizationEntry>();
-        _mappings = JsonSerializer.Deserialize<LocalizationMap>(al);
+        _mappings = JsonSerializer.Deserialize<LocalizationMap>(al, LocalizationMapJsonContext.Default.LocalizationMap);
 
         static void KeepType<
 #if NET5_0_OR_GREATER
             [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
 #endif
-            T>() { }
+        T>()
+        { }
     }
 
     static FALocalizationHelper()
@@ -87,7 +90,7 @@ public class FALocalizationHelper
         }
     }
 
-    private class LocalizationMap : Dictionary<string, LocalizationEntry>
+    internal class LocalizationMap : Dictionary<string, LocalizationEntry>
     {
         public LocalizationMap()
             : base(StringComparer.InvariantCultureIgnoreCase)
@@ -95,4 +98,10 @@ public class FALocalizationHelper
 
         }
     }
+}
+
+
+[JsonSerializable(typeof(FALocalizationHelper.LocalizationMap))]
+internal partial class LocalizationMapJsonContext : JsonSerializerContext
+{
 }
